@@ -8,7 +8,7 @@ A Github actions script gets the compiler files from github repositories instead
 |---------|------------------|----------|-------------------------------------------------------------------|
 | in      | String           | Yes      | Name (and path if not root) of file to compile                    |
 | out     | String           | No       | Name (and path if not root) to give the compiled script           |
-| version | String           | No       | Version to compile with, as a Github tag                          |
+| version | String           | No       | Version to compile with, as a Github tag, or latest               |
 | bits    | String or Number | No       | Compiler bit count (also specify text defining encoding, v1 only) |
 
 ## Remarks

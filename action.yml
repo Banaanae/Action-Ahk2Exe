@@ -12,7 +12,7 @@ inputs:
   version:
     description: Version to compile with, as a Github tag
     required: false
-    default: "v2.0.18" # TODO: latest
+    default: "latest"
   bits:
     description: Compiler bit count (also specify U before bits for unicode, v1 only)
     required: false
@@ -31,8 +31,12 @@ runs:
         Invoke-WebRequest "https://github.com/AutoHotkey/Ahk2Exe/releases/download/$tag/$tag.zip" -Out "ahk.zip"
         Expand-Archive "ahk.zip" -Force
         $scriptDir = Get-Location
-        $compileExe = Join-Path -Path (Join-Path -Path $scriptDir -ChildPath "ahk") -ChildPath "Ahk2Exe.exe"        
-        
+        $compileExe = Join-Path -Path (Join-Path -Path $scriptDir -ChildPath "ahk") -ChildPath "Ahk2Exe.exe"
+
+        if($compileTag -eq "latest"){
+          $releasesAHK = "https://api.github.com/repos/AutoHotkey/AutoHotkey/releases"
+          $compileTag = (Invoke-WebRequest $releasesAHK | ConvertFrom-Json)[0].tag_name
+        }
         $file = "AutoHotkey_$($compileTag -replace '^v', '').zip"
         Invoke-WebRequest "https://github.com/AutoHotkey/AutoHotkey/releases/download/$compileTag/$file" -Out "ahk.zip"
         Expand-Archive "ahk.zip" -Force
@@ -40,12 +44,12 @@ runs:
         $compileName = "${{inputs.in}}"
         $outName = "${{inputs.out}}"
         $bits = "${{inputs.bits}}"
-        
+
         $argList = "/base .\ahk\AutoHotkey$bits.exe /in $compileName"
         if($outName -ne ''){
           $argList += " /out $outName"
         }
-        
+
         Start-Process -FilePath $compileExe -ArgumentList $argList
 
 branding:
