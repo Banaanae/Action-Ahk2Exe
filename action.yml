@@ -24,21 +24,22 @@ runs:
     - name: Install AutoHoeykey and Ahk2Exe
       shell: pwsh
       run: |
-        # https://gist.github.com/MarkTiedemann/c0adc1701f3f5c215fc2c2d5b1d5efd3
         $compileTag = "${{inputs.version}}"
         $releases = "https://api.github.com/repos/AutoHotkey/Ahk2Exe/releases"
-        $tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
-        Invoke-WebRequest "https://github.com/AutoHotkey/Ahk2Exe/releases/download/$tag/$tag.zip" -Out "ahk.zip"
+        $ahk2exeDL = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[0].browser_download_url
+        Invoke-WebRequest "$ahk2exeDL" -Out "ahk.zip"
         Expand-Archive "ahk.zip" -Force
         $scriptDir = Get-Location
         $compileExe = Join-Path -Path (Join-Path -Path $scriptDir -ChildPath "ahk") -ChildPath "Ahk2Exe.exe"
 
         if($compileTag -eq "latest"){
           $releasesAHK = "https://api.github.com/repos/AutoHotkey/AutoHotkey/releases"
-          $compileTag = (Invoke-WebRequest $releasesAHK | ConvertFrom-Json)[0].tag_name
+          $binDL = (Invoke-WebRequest $releasesAHK | ConvertFrom-Json)[0].assets[0].browser_download_url
+          Invoke-WebRequest "$binDL" -Out "ahk.zip"
+        }else{
+          $file = "AutoHotkey_$($compileTag -replace '^v', '').zip"
+          Invoke-WebRequest "https://github.com/AutoHotkey/AutoHotkey/releases/download/$compileTag/$file" -Out "ahk.zip"
         }
-        $file = "AutoHotkey_$($compileTag -replace '^v', '').zip"
-        Invoke-WebRequest "https://github.com/AutoHotkey/AutoHotkey/releases/download/$compileTag/$file" -Out "ahk.zip"
         Expand-Archive "ahk.zip" -Force
 
         $compileName = "${{inputs.in}}"
