@@ -4,12 +4,12 @@ A Github actions script gets the compiler files from github repositories instead
 
 ## Inputs
 
-| Input   | Type             | Required | Description                                                       |
-|---------|------------------|----------|-------------------------------------------------------------------|
-| in      | String           | Yes      | Name (and path if not root) of file to compile                    |
-| out     | String           | No       | Name (and path if not root) to give the compiled script           |
-| version | String           | No       | Version to compile with, as a Github tag, or latest               |
-| bits    | String or Number | No       | Compiler bit count (also specify text defining encoding, v1 only) |
+| Input   | Type             | Required | Description                                                                 |
+|---------|------------------|----------|-----------------------------------------------------------------------------|
+| in      | String           | Yes      | Name (and path if not root) of file to compile, (newline separated)         |
+| out     | String           | No       | Name (and path if not root) for the compiled files (must match input order) |
+| version | String           | No       | Version to compile with, as a Github tag, or latest                         |
+| bits    | String or Number | No       | Compiler bit count (also specify text defining encoding, v1 only)           |
 
 ## Remarks
 
@@ -45,10 +45,14 @@ jobs:
         id: ahk2exe
         uses: Banaanae/Action-Ahk2Exe@main
         with:
-            in: MyScript.ahk
+            in: |
+              MyScript.ahk
+              MyLib.ahk
           
       - name: Release # Upload binary to most recent release
         uses: softprops/action-gh-release@v2
         with:
-          files: MyScript.exe
+          files: |
+            MyScript.exe
+            MyLib.exe
 ```

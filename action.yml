@@ -4,10 +4,10 @@ author: Banaanae
 
 inputs:
   in:
-    description: Name (and path if not root) of file to compile
+    description: Name (and path if not root) of file to compile, (newline separated)
     required: true
   out:
-    description: Name (and path if not root) to give the compiled script
+    description: Name (and path if not root) for the compiled files (must match input order)
     required: false
   version:
     description: Version to compile with, as a Github tag
@@ -21,7 +21,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install AutoHoeykey and Ahk2Exe
+    - name: Install AutoHotkey and Ahk2Exe
       shell: pwsh
       run: |
         $compileTag = "${{inputs.version}}"
@@ -42,16 +42,36 @@ runs:
         }
         Expand-Archive "ahk.zip" -Force
 
-        $compileName = "${{inputs.in}}"
-        $outName = "${{inputs.out}}"
-        $bits = "${{inputs.bits}}"
+        $inList = "${{inputs.in}}" -split "`n+" | Where-Object { $_ -ne "" }
+        $outRaw = "${{inputs.out}}"
 
-        $argList = "/base .\ahk\AutoHotkey$bits.exe /in $compileName"
-        if($outName -ne ''){
-          $argList += " /out $outName"
+        if($outRaw -ne ""){
+          $outList = $outRaw -split "`n+"
+        }else{
+          $outList = @()
         }
 
-        Start-Process -FilePath $compileExe -ArgumentList $argList
+        $bits = "${{inputs.bits}}"
+
+        for ($i = 0; $i -lt $inList.Count; $i++) {
+          $compileName = $inList[$i].Trim()
+
+          if ($i -lt $outList.Count) {
+            $outName = $outList[$i].Trim()
+          } else {
+            $outName = ""
+          }
+
+          $argList = "/base .\ahk\AutoHotkey$bits.exe /in `"$compileName`""
+
+          if ($outName -ne "") {
+            $argList += " /out `"$outName`""
+          }
+
+          Write-Host "Compiling $compileName -> $outName ($i/$inList.Count)"
+
+          Start-Process -FilePath $compileExe -ArgumentList $argList -Wait
+        }
 
 branding:
   color: blue
