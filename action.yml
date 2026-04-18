@@ -68,7 +68,7 @@ runs:
             $argList += " /out `"$outName`""
           }
 
-          Write-Host "Compiling $compileName -> $outName ($i/$inList.Count)"
+          Write-Host "Compiling $compileName -> $outName"
 
           Start-Process -FilePath $compileExe -ArgumentList $argList -Wait
         }
